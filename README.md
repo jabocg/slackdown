@@ -1,10 +1,10 @@
 # slackdown
 Convert exported Slack messages to Markdown format, written in Python because do I even write anything else?
 
-# Installation
+## Installation
 `pip install slackdown`<sub>(someday...)</sub>
 
-# Usage
+## Usage
 1. Download Slack message data as .zip
 2. Extract message data
 3. `cd` to folder

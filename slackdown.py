@@ -15,5 +15,9 @@ def __main__():
     zfile.extractall(path='.tmp/')
 
 
+def readChannel():
+    pass
+
+
 if __name__ == '__main__':
     __main__()

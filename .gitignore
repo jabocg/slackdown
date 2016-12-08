@@ -93,3 +93,18 @@ ENV/
 *.swo
 .*.swp
 .*.swo
+
+# Archive files
+*.zip
+*.rar
+*.7z
+*.tar
+*.gz
+
+# Temp files
+*.tmp
+*.bak
+tmp/
+.tmp/
+temp/
+.temp/

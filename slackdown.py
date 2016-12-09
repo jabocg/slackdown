@@ -10,7 +10,7 @@ import os
 from pathlib import Path
 import sys
 from time import strftime
-import zipfile
+from zipfile import ZipFile
 
 temppath = '.tmp/'
 
@@ -28,15 +28,16 @@ logging.basicConfig(filename=logfile, level=logging.DEBUG,
                     format=logfmt, datefmt='%Y-%m-%d %H:%M:%S')
 
 
-def __main__():
+def main():
     extractRecords()
     channels = [p for p in Path(temppath).iterdir() if p.is_dir()]
     for c in channels:
-        cname = c.parts[-1]
-        logger.debug('channel name: {}'.format(cname))
+        cname = c.name
         logger.debug('subdir: {}'.format(c))
+        logger.info('converting channel #{}'.format(cname))
         for f in list(c.glob('*.json')):
             jsonToMarkdown(f)
+        concatFiles(cname, list(c.glob('*.md')).sort())
 
 
 def jsonToMarkdown(jsonFile):
@@ -45,13 +46,28 @@ def jsonToMarkdown(jsonFile):
     Parameters:
         jsonFile -- pathlib.Path object representing a file
     """
-    pass
+    logger.debug('jsonFile: {}'.format(jsonFile))
+    mdFileName = jsonFile.parent / (jsonFile.stem + '.md')
+    logger.debug('mdFile: {}'.format(mdFileName))
+
+
+def concatFiles(filename, files):
+    """Concatenate a list of files into one file.
+
+    Parameters:
+        fileName -- name of the ending file
+        files -- list of files to concatenate
+    """
+    logger.debug('filename: {}'.format(filename))
+    logger.debug('files: {}'.format(files))
 
 
 def extractRecords():
-    zfile = zipfile.ZipFile(sys.argv[1])
+    logger.debug('zip file: {}'.format(sys.argv[1]))
+    logger.debug('temp path: {}'.format(temppath))
+    zfile = ZipFile(sys.argv[1])
     zfile.extractall(path=temppath)
 
 
 if __name__ == '__main__':
-    __main__()
+    main()

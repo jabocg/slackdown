@@ -5,6 +5,7 @@
 Slackdown -- The Slack to Markdown converter.
 """
 
+from datetime import datetime
 import json
 import logging
 import os
@@ -54,8 +55,15 @@ def jsonToMarkdown(jsonFile):
     mdFileName = jsonFile.parent / (jsonFile.stem + '.md')
     logger.debug('mdFile: {}'.format(mdFileName))
     with jsonFile.open() as f:
-        jsonObj = json.loads(f.read())
-    logger.debug('json object: {}'.format(jsonObj))
+        messages = json.loads(f.read())
+    logger.debug('json object: {}'.format(messages))
+    with mdFileName.open(mode='w') as mdf:
+        for m in messages:
+            logger.debug('message data: {}'.format(m))
+            message = m['text']
+            userid = m['user']
+            timestamp = datetime.fromtimestamp(int(m['ts'].split('.')[0]))
+            mdf.write('{} - **{}**: {}\n\n'.format(timestamp, userid, message))
 
 
 def concatFiles(filename, files):

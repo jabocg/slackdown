@@ -5,6 +5,7 @@
 Slackdown -- The Slack to Markdown converter.
 """
 
+import json
 import logging
 import os
 from pathlib import Path
@@ -15,29 +16,32 @@ from zipfile import ZipFile
 temppath = '.tmp/'
 
 # logging setup
+verbose = True if sys.argv[1] == '-v' else False
 if not os.path.isdir('log'):
     if os.path.exists('log'):
         os.remove('log')
     os.mkdir('log')
 logfile = 'log/{}.log'.format(strftime('%Y%m%dT%H%M%S'))
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 logfmt = '%(asctime)s - %(module)s - %(levelname)s - '
 logfmt += '%(funcName)s(%(lineno)d) - %(message)s'
-logging.basicConfig(filename=logfile, level=logging.DEBUG,
+logging.basicConfig(filename=logfile,
                     format=logfmt, datefmt='%Y-%m-%d %H:%M:%S')
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG if verbose else logging.INFO)
+handler = logging.StreamHandler(stream=sys.stdout)
+logger.addHandler(handler)
 
 
 def main():
     extractRecords()
     channels = [p for p in Path(temppath).iterdir() if p.is_dir()]
     for c in channels:
-        cname = c.name
+        channelName = c.name
         logger.debug('subdir: {}'.format(c))
-        logger.info('converting channel #{}'.format(cname))
+        logger.info('converting channel #{}'.format(channelName))
         for f in list(c.glob('*.json')):
             jsonToMarkdown(f)
-        concatFiles(cname, list(c.glob('*.md')).sort())
+        concatFiles(channelName, list(c.glob('*.md')).sort())
 
 
 def jsonToMarkdown(jsonFile):
@@ -49,6 +53,9 @@ def jsonToMarkdown(jsonFile):
     logger.debug('jsonFile: {}'.format(jsonFile))
     mdFileName = jsonFile.parent / (jsonFile.stem + '.md')
     logger.debug('mdFile: {}'.format(mdFileName))
+    with jsonFile.open() as f:
+        jsonObj = json.loads(f.read())
+    logger.debug('json object: {}'.format(jsonObj))
 
 
 def concatFiles(filename, files):
@@ -63,9 +70,9 @@ def concatFiles(filename, files):
 
 
 def extractRecords():
-    logger.debug('zip file: {}'.format(sys.argv[1]))
+    logger.debug('zip file: {}'.format(sys.argv[-1]))
     logger.debug('temp path: {}'.format(temppath))
-    zfile = ZipFile(sys.argv[1])
+    zfile = ZipFile(sys.argv[-1])
     zfile.extractall(path=temppath)
 
 

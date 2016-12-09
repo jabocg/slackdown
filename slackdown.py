@@ -12,6 +12,7 @@ import sys
 from time import strftime
 import zipfile
 
+temppath = '.tmp/'
 
 # logging setup
 if not os.path.isdir('log'):
@@ -27,8 +28,29 @@ logging.basicConfig(filename=logfile, level=logging.DEBUG,
                     format=logfmt, datefmt='%Y-%m-%d %H:%M:%S')
 
 
-def readChannel():
+def __main__():
+    extractRecords()
+    channels = [p for p in Path(temppath).iterdir() if p.is_dir()]
+    for c in channels:
+        cname = c.parts[-1]
+        logger.debug('channel name: {}'.format(cname))
+        logger.debug('subdir: {}'.format(c))
+        for f in list(c.glob('*.json')):
+            jsonToMarkdown(f)
+
+
+def jsonToMarkdown(jsonFile):
+    """Translate a JSON file to a markdown file.
+
+    Parameters:
+        jsonFile -- pathlib.Path object representing a file
+    """
     pass
+
+
+def extractRecords():
+    zfile = zipfile.ZipFile(sys.argv[1])
+    zfile.extractall(path=temppath)
 
 
 if __name__ == '__main__':

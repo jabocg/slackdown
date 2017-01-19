@@ -5,6 +5,7 @@
 Slackdown -- The Slack to Markdown converter.
 """
 
+from collections import namedtuple
 from datetime import datetime
 import json
 import logging
@@ -15,6 +16,8 @@ from time import strftime
 from zipfile import ZipFile
 
 temppath = '.tmp/'
+
+User = namedtuple('User', ['username', 'fullname', 'userid'])
 
 # logging setup
 verbose = True if sys.argv[1] == '-v' else False
@@ -35,6 +38,7 @@ logger.addHandler(handler)
 
 def main():
     extractRecords()
+    users = getUsers()
     channels = [p for p in Path(temppath).iterdir() if p.is_dir()]
     for c in channels:
         channelName = c.name
@@ -75,6 +79,26 @@ def concatFiles(filename, files):
     """
     logger.debug('filename: {}'.format(filename))
     logger.debug('files: {}'.format(files))
+
+
+def getUsers():
+    """Get users and pertinent data.
+
+    Returns:
+        list -- list of named tuples containing User's ID, username, and Full 
+                Name
+    """
+    users = []
+    userFile = Path(temppath) / 'users.json'
+    logger.debug('getting users from {}'.format(userFile))
+    with userFile.open() as f:
+        userdata = json.loads(f.read())
+        logger.debug('got userdata: {}'.format(userdata))
+        for u in userdata:
+            logger.debug('creating user {}'.format(u))
+            users.append(User(u['name'], u['real_name'], u['id']))
+    logger.debug('full list of users: {}'.format(users))
+    return users
 
 
 def extractRecords():

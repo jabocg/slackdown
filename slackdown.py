@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# -*- coding: <encoding name> -*-
+# -*- coding: utf-8 -*-
 
 """
 Slackdown -- The Slack to Markdown converter.
@@ -46,7 +46,10 @@ def main():
         logger.info('converting channel #{}'.format(channelName))
         for f in list(c.glob('*.json')):
             jsonToMarkdown(f)
-        concatFiles(channelName, list(c.glob('*.md')).sort())
+        mdfiles = sorted(list(c.glob('*.md')))
+        logger.debug('got mdfiles: {}'.format(mdfiles))
+        convertIDs(mdfiles, users)
+        concatFiles(channelName, mdfiles)
 
 
 def jsonToMarkdown(jsonFile):
@@ -79,6 +82,13 @@ def concatFiles(filename, files):
     """
     logger.debug('filename: {}'.format(filename))
     logger.debug('files: {}'.format(files))
+    newPath = Path(temppath) / (filename + '.md')
+    with newPath.open('w+') as newfile:
+        for f in files:
+            logger.debug('reading {}'.format(f))
+            with f.open() as ff:
+                logger.debug('writing data')
+                newfile.write(ff.read())
 
 
 def getUsers():
@@ -99,6 +109,31 @@ def getUsers():
             users.append(User(u['name'], u['real_name'], u['id']))
     logger.debug('full list of users: {}'.format(users))
     return users
+
+
+def convertIDs(files, users):
+    """Convert userIDs in files to actual usernames and names
+
+    Parameters:
+        files -- list of posix.Paths to change userIDs in 
+        users -- list of users to convert IDs of
+    """
+    logger.debug('list of files: {}'.format(files))
+    logger.debug('list of users: {}'.format(users))
+    for afile in files:
+        logger.debug('current file: {}'.format(afile))
+        with afile.open('r+') as f:
+            logger.debug('reading whole file')
+            wholefilestring = f.read()
+            logger.debug('iterating through users')
+            for u in users:
+                logger.debug('current user: {}'.format(u))
+                wholefilestring = wholefilestring.replace(u.userid, '{}({})'.format(u.fullname, u.username))
+            logger.debug('new string'.format(wholefilestring))
+            logger.debug('seeking to start of file')
+            f.seek(0)
+            logger.debug('writing data to file {}'.format(afile))
+            f.write(wholefilestring)
 
 
 def extractRecords():

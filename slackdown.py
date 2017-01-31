@@ -82,7 +82,7 @@ def concatFiles(filename, files):
     """
     logger.debug('filename: {}'.format(filename))
     logger.debug('files: {}'.format(files))
-    newPath = Path(temppath) / (filename + '.md')
+    newPath = Path(filename + '.md')
     with newPath.open('w+') as newfile:
         for f in files:
             logger.debug('reading {}'.format(f))

@@ -6,8 +6,7 @@ Convert exported Slack messages to Markdown format, written in Python because do
 
 ## Usage
 1. Download Slack message data as .zip
-2. Extract message data
-3. `cd` to folder
-4. run `slackdown`
+2. Run `slackdown` in the directory with the zip file as an argument.
+3. ???
+4. You now have a markdown file for every channel.
 5. Profit.
-6. Use [`pandoc`](https://pandoc.org) to format to docx, _maybe..._

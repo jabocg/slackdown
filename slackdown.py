@@ -5,6 +5,7 @@
 Slackdown -- The Slack to Markdown converter.
 """
 
+import argparse
 from collections import namedtuple
 from datetime import datetime
 import json
@@ -19,6 +20,11 @@ temppath = '.tmp/'
 
 User = namedtuple('User', ['username', 'fullname', 'userid'])
 
+# argument parsing
+parser = argparse.ArgumentParser(description='''Translate Slack-generated logs \
+into a readable, Markdown format.''')
+parser.add_argument('-v', '--verbose', default=False, required=False)
+
 # logging setup
 verbose = True if sys.argv[1] == '-v' else False
 if not os.path.isdir('log'):
@@ -31,7 +37,7 @@ logfmt += '%(funcName)s(%(lineno)d) - %(message)s'
 logging.basicConfig(filename=logfile,
                     format=logfmt, datefmt='%Y-%m-%d %H:%M:%S')
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG if verbose else logging.INFO)
+logger.setLevel(logging.DEBUG if verbose else logging.ERROR if quiet else logging.INFO)
 handler = logging.StreamHandler(stream=sys.stdout)
 logger.addHandler(handler)
 
